@@ -269,3 +269,19 @@ func TestAddOptionNonOptional(t *testing.T) {
 		t.Errorf("option not set")
 	}
 }
+
+func TestAddOptionString(t *testing.T) {
+	var opts struct {
+		Test string
+	}
+	p := NewParser(&opts, Default)
+	p.AddOption(&Option{
+		LongName: "test",
+	}, &opts.Test)
+	_, err := p.ParseArgs([]string{"--test", "test"})
+	if err != nil {
+		t.Errorf("unexpected error: %s", err)
+	} else if opts.Test != "test" {
+		t.Errorf("option not set")
+	}
+}
