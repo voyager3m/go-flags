@@ -473,8 +473,6 @@ func (p *Parser) WriteHelp(writer io.Writer) {
 		fmt.Fprintln(wr)
 		fmt.Fprintln(wr, "Available commands:")
 
-		p.PrintAdditionalUsageInfo()
-
 		for _, c := range scommands {
 			fmt.Fprintf(wr, "  %s", c.Name)
 
@@ -491,6 +489,8 @@ func (p *Parser) WriteHelp(writer io.Writer) {
 			fmt.Fprintln(wr)
 		}
 	}
+
+	p.PrintAdditionalUsageInfo()
 
 	wr.Flush()
 }
