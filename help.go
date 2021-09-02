@@ -490,7 +490,9 @@ func (p *Parser) WriteHelp(writer io.Writer) {
 		}
 	}
 
-	p.PrintAdditionalUsageInfo()
+	if p.PrintAdditionalUsageInfo != nil {
+		p.PrintAdditionalUsageInfo(wr)
+	}
 
 	wr.Flush()
 }
