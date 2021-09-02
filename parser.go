@@ -5,6 +5,7 @@
 package flags
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"os"
@@ -54,6 +55,10 @@ type Parser struct {
 	// The command passed into CommandHandler may be nil in case there is no
 	// command to be executed when parsing has finished.
 	CommandHandler func(command Commander, args []string) error
+
+	// PrintAdditionalUsageInfo is a function that can be called in the case
+	// of an unknown flag or a help flag to print additional information
+	PrintAdditionalUsageInfo func(wr *bufio.Writer)
 
 	internalError error
 }
