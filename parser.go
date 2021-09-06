@@ -5,9 +5,9 @@
 package flags
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"sort"
@@ -58,7 +58,7 @@ type Parser struct {
 
 	// PrintAdditionalUsageInfo is a function that can be called in the case
 	// of an unknown flag or a help flag to print additional information
-	PrintAdditionalUsageInfo func(wr *bufio.Writer)
+	PrintAdditionalUsageInfo func(wr io.Writer)
 
 	internalError error
 }
