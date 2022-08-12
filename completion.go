@@ -234,14 +234,14 @@ func (c *completion) complete(args []string) []Completion {
 				}
 			}
 		} else {
-			if len(s.positional) > 0 {
+			if cmd, ok := s.lookup.commands[arg]; ok {
+				cmd.fillParseState(s)
+			} else if len(s.positional) > 0 {
 				if !s.positional[0].isRemaining() {
 					// Don't advance beyond a remaining positional arg (because
 					// it consumes all subsequent args).
 					s.positional = s.positional[1:]
 				}
-			} else if cmd, ok := s.lookup.commands[arg]; ok {
-				cmd.fillParseState(s)
 			}
 
 			opt = nil
@@ -283,12 +283,16 @@ func (c *completion) complete(args []string) []Completion {
 		} else {
 			ret = c.completeNamesForShortPrefix(s, prefix, optname)
 		}
-	} else if len(s.positional) > 0 {
-		// Complete for positional argument
-		ret = c.completeValue(s.positional[0].value, nil, "", lastarg)
 	} else if len(s.command.commands) > 0 {
 		// Complete for command
 		ret = c.completeCommands(s, lastarg)
+		if len(ret) == 0 && len(s.positional) > 0 {
+			// Complete for positional arguments if available
+			ret = c.completeValue(s.positional[0].value, nil, "", lastarg)
+		}
+	} else if len(s.positional) > 0 {
+		// Complete for positional argument
+		ret = c.completeValue(s.positional[0].value, nil, "", lastarg)
 	}
 
 	sort.Sort(completions(ret))
