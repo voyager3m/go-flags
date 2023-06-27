@@ -13,26 +13,26 @@ import (
 )
 
 type defaultOptions struct {
-	Int        int `long:"i"`
-	IntDefault int `long:"id" default:"1"`
+	Int        int `long:"i" env:"ENV_I"`
+	IntDefault int `long:"id" default:"1" env:"ENV_ID"`
 
-	Float64        float64 `long:"f"`
-	Float64Default float64 `long:"fd" default:"-3.14"`
+	Float64        float64 `long:"f" env:"ENV_F"`
+	Float64Default float64 `long:"fd" default:"-3.14" env:"ENV_FD"`
 
-	NumericFlag bool `short:"3"`
+	NumericFlag bool `short:"3" env:"ENV_3"`
 
-	String            string `long:"str"`
-	StringDefault     string `long:"strd" default:"abc"`
-	StringNotUnquoted string `long:"strnot" unquote:"false"`
+	String            string `long:"str" env:"ENV_STR"`
+	StringDefault     string `long:"strd" default:"abc" env:"ENV_STRD"`
+	StringNotUnquoted string `long:"strnot" unquote:"false" env:"ENV_STRNOT"`
 
-	Time        time.Duration `long:"t"`
-	TimeDefault time.Duration `long:"td" default:"1m"`
+	Time        time.Duration `long:"t" env:"ENV_T"`
+	TimeDefault time.Duration `long:"td" default:"1m" env:"ENV_TD"`
 
-	Map        map[string]int `long:"m"`
-	MapDefault map[string]int `long:"md" default:"a:1"`
+	Map        map[string]int `long:"m" env:"ENV_M"`
+	MapDefault map[string]int `long:"md" default:"a:1" env:"ENV_MD"`
 
-	Slice        []int `long:"s"`
-	SliceDefault []int `long:"sd" default:"1" default:"2"`
+	Slice        []int `long:"s" env:"ENV_S" env-delim:","`
+	SliceDefault []int `long:"sd" default:"1" default:"2" env:"ENV_SD" env-delim:","`
 }
 
 func TestDefaults(t *testing.T) {
@@ -693,4 +693,72 @@ func TestMapOfSlices(t *testing.T) {
 	}
 	assertStringArray(t, opts.M["a"], []string{"b", "c"})
 	assertStringArray(t, opts.M["d"], []string{"e"})
+}
+
+func TestDefaultsFromFile(t *testing.T) {
+	var tests = []struct {
+		msg      string
+		args     []string
+		expected defaultOptions
+	}{
+		{
+			msg:  "defaults from file, expecting overwritten arguments",
+			args: []string{""},
+			expected: defaultOptions{
+				Int:        3,
+				IntDefault: 3,
+
+				Float64:        -2.71,
+				Float64Default: 2.71,
+
+				NumericFlag: true,
+
+				String:        "def",
+				StringDefault: "def",
+
+				Time:        3 * time.Millisecond,
+				TimeDefault: 3 * time.Millisecond,
+
+				Map:        map[string]int{"c": 3},
+				MapDefault: map[string]int{"c": 3},
+
+				Slice:        []int{1, 2, 3},
+				SliceDefault: []int{3},
+			},
+		},
+	}
+
+	os.Setenv("ENV_FILENAME", ".env-test")
+	os.WriteFile(".env-test", []byte(`
+	ENV_I=3  #comment line
+	ENV_ID=3
+	ENV_F=-2.71
+	ENV_FD=2.71
+	ENV_3=true
+	ENV_STR=def
+	ENV_STRD=def
+	ENV_T=3ms
+	ENV_TD=3ms
+	ENV_M=c:3
+	ENV_MD=c:3
+	ENV_S=1,2,3
+	ENV_SD=3
+	`), 0644)
+
+	for _, test := range tests {
+		var opts defaultOptions
+
+		_, err := ParseArgs(&opts, test.args)
+		if err != nil {
+			t.Fatalf("%s:\nUnexpected error: %v", test.msg, err)
+		}
+
+		if opts.Slice == nil {
+			opts.Slice = []int{}
+		}
+
+		if !reflect.DeepEqual(opts, test.expected) {
+			t.Errorf("%s:\nUnexpected options with arguments %+v\nexpected\n%+v\nbut got\n%+v\n", test.msg, test.args, test.expected, opts)
+		}
+	}
 }

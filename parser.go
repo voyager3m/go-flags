@@ -215,10 +215,42 @@ func (p *Parser) ParseArgs(args []string) ([]string, error) {
 		return nil, p.internalError
 	}
 
+	envdata := map[string]string{}
+	envfilename := os.Getenv("ENV_FILENAME")
+	if len(envfilename) == 0 {
+		envfilename = ".env"
+	}
+	if data, err := os.ReadFile(envfilename); err == nil {
+
+		strs := strings.Split(string(data), "\n")
+		for _, i := range strs {
+			if idx := strings.Index(i, "#"); idx > 0 {
+				i = i[:idx]
+			}
+			if idx := strings.Index(i, "="); idx > 0 {
+				k := strings.TrimSpace(i[:idx])
+				if len(k) > 0 {
+					envdata[k] = strings.TrimSpace(i[idx+1:])
+				}
+			}
+		}
+	}
+
 	p.eachOption(func(c *Command, g *Group, option *Option) {
 		option.isSet = false
 		option.isSetDefault = false
+
 		option.updateDefaultLiteral()
+
+		if len(option.EnvDefaultKey) > 0 {
+			if val, ok := envdata[option.EnvDefaultKey]; ok {
+				if len(option.EnvDefaultDelim) > 0 {
+					option.Default = strings.Split(val, option.EnvDefaultDelim)
+				} else {
+					option.Default = []string{val}
+				}
+			}
+		}
 	})
 
 	// Add built-in help group to all commands if necessary

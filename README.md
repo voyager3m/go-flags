@@ -28,6 +28,7 @@ Supported features:
 * Supports maps
 * Supports function callbacks
 * Supports namespaces for (nested) option groups
+* Load default values from .env file (can be changed by ENV_FILENAME environment variable)
 
 The flags package uses structs, reflection and struct field tags
 to allow users to specify command line options. This results in very simple
@@ -78,6 +79,12 @@ var opts struct {
 
 	// Example of a map
 	IntMap map[string]int `long:"intmap" description:"A map from string to int"`
+	
+	// Example of a environment variable
+	// variable can be defined in .env file
+	// example: LISTEN_ADDR=localhost:80
+	Name string `long:"addr" description:"Listen addr" env:"LISTEN_ADDR"`
+
 }
 
 // Callback which will invoke callto:<argument> to call a number.
