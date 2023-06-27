@@ -1,7 +1,6 @@
 go-flags: a go library for parsing command line arguments
 =========================================================
 
-[![GoDoc](https://godoc.org/github.com/jessevdk/go-flags?status.png)](https://godoc.org/github.com/jessevdk/go-flags) [![Build Status](https://travis-ci.org/jessevdk/go-flags.svg?branch=master)](https://travis-ci.org/jessevdk/go-flags) [![Coverage Status](https://img.shields.io/coveralls/jessevdk/go-flags.svg)](https://coveralls.io/r/jessevdk/go-flags?branch=master)
 
 This library provides similar functionality to the builtin flag library of
 go, but provides much more functionality and nicer formatting. From the
@@ -83,7 +82,7 @@ var opts struct {
 	// Example of a environment variable
 	// variable can be defined in .env file
 	// example: LISTEN_ADDR=localhost:80
-	Name string `long:"addr" description:"Listen addr" env:"LISTEN_ADDR"`
+	Addr string `long:"addr" description:"Listen addr" env:"LISTEN_ADDR"`
 
 }
 
@@ -132,8 +131,10 @@ fmt.Printf("StringSlice: %v\n", opts.StringSlice)
 fmt.Printf("PtrSlice: [%v %v]\n", *opts.PtrSlice[0], *opts.PtrSlice[1])
 fmt.Printf("IntMap: [a:%v b:%v]\n", opts.IntMap["a"], opts.IntMap["b"])
 fmt.Printf("Remaining args: %s\n", strings.Join(args, " "))
+fmt.Printf("Addr: %s\n", opts.Addr)
 
-// Output: Verbosity: [true true]
+// Output: 
+// Verbosity: [true true]
 // Offset: 5
 // Name: Me
 // Ptr: 3
@@ -141,6 +142,7 @@ fmt.Printf("Remaining args: %s\n", strings.Join(args, " "))
 // PtrSlice: [hello world]
 // IntMap: [a:1 b:5]
 // Remaining args: arg1 arg2 arg3
+// Addr: localhost:80
 ```
 
 More information can be found in the godocs: <http://godoc.org/github.com/jessevdk/go-flags>
